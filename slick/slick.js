@@ -6,7 +6,7 @@
 |___/_|_|\___|_|\_(_)/ |___/
                    |__/
 
- Version: 1.5.9
+ Version: 1.5.9.1
   Author: Ken Wheeler
  Website: http://kenwheeler.github.io
     Docs: http://kenwheeler.github.io/slick
@@ -87,7 +87,8 @@
                 vertical: false,
                 verticalSwiping: false,
                 waitForAnimate: true,
-                zIndex: 1000
+                zIndex: 1000,
+                customWidth: false
             };
 
             _.initials = {
@@ -1931,10 +1932,12 @@
         _.listHeight = _.$list.height();
 
 
-        if (_.options.vertical === false && _.options.variableWidth === false) {
+        if (_.options.vertical === false && _.options.variableWidth === false && _.options.customWidth === false) {
             _.slideWidth = Math.ceil(_.listWidth / _.options.slidesToShow);
             _.$slideTrack.width(Math.ceil((_.slideWidth * _.$slideTrack.children('.slick-slide').length)));
-
+        } else if (_.options.customWidth === true) {
+            _.slideWidth = _.$slideTrack.children('.slick-slide').outerWidth(true);
+            _.$slideTrack.width(Math.ceil((_.slideWidth * _.$slideTrack.children('.slick-slide').length)));
         } else if (_.options.variableWidth === true) {
             _.$slideTrack.width(5000 * _.slideCount);
         } else {
