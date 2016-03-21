@@ -6,7 +6,7 @@
 |___/_|_|\___|_|\_(_)/ |___/
                    |__/
 
- Version: 1.5.9.1
+ Version: 1.5.10
   Author: Ken Wheeler
  Website: http://kenwheeler.github.io
     Docs: http://kenwheeler.github.io/slick
@@ -1213,7 +1213,6 @@
             });
 
             slidesTraversed = Math.abs($(swipedSlide).attr('data-slick-index') - _.currentSlide) || 1;
-
             return slidesTraversed;
 
         } else {
@@ -1935,6 +1934,14 @@
         if (_.options.vertical === false && _.options.variableWidth === false && _.options.customWidth === false) {
             _.slideWidth = Math.ceil(_.listWidth / _.options.slidesToShow);
             _.$slideTrack.width(Math.ceil((_.slideWidth * _.$slideTrack.children('.slick-slide').length)));
+        } else if (_.options.customWidth === true && _.$slideTrack.find('.js-carousel-slide-double')) {
+            var double = _.$slideTrack.find('.js-carousel-slide-double');
+            var doubleWidth = double.find(':first-child').outerWidth(true);
+            _.slideWidth = _.$slideTrack.children('.slick-slide:not(:first-child)').outerWidth(true);
+            _.$slideTrack.width(Math.ceil((_.slideWidth * (_.$slideTrack.children('.slick-slide').length - 1) + doubleWidth)));
+            double.css({
+              'width': doubleWidth
+            });
         } else if (_.options.customWidth === true) {
             _.slideWidth = _.$slideTrack.children('.slick-slide').outerWidth(true);
             _.$slideTrack.width(Math.ceil((_.slideWidth * _.$slideTrack.children('.slick-slide').length)));
@@ -1946,7 +1953,9 @@
         }
 
         var offset = _.$slides.first().outerWidth(true) - _.$slides.first().width();
-        if (_.options.variableWidth === false) _.$slideTrack.children('.slick-slide').width(_.slideWidth - offset);
+        if (_.options.variableWidth === false) {
+          _.$slideTrack.children('.slick-slide:not(.js-carousel-slide-double)').width(_.slideWidth - offset);
+        }
 
     };
 
