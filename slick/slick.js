@@ -6,7 +6,7 @@
 |___/_|_|\___|_|\_(_)/ |___/
                    |__/
 
- Version: 1.5.12
+ Version: 1.5.13
   Author: Ken Wheeler
  Website: http://kenwheeler.github.io
     Docs: http://kenwheeler.github.io/slick
@@ -682,11 +682,9 @@
 
         var _ = this,
             $target = $(event.currentTarget),
-            indexOffset, slideOffset, unevenOffset;
-
-        var sliderWidth = _.$slider.width();
-        var visibleSlidesWidth = _.slideWidth * _.options.slidesToShow;
-        var remainingSlides;
+            sliderWidth = _.$slider.width(),
+            visibleSlidesWidth = _.slideWidth * _.options.slidesToShow,
+            indexOffset, partialSlideRemaining, remainingSlides, slideOffset, unevenOffset;
 
         // If target is a link, prevent default action.
         if($target.is('a')) {
@@ -698,26 +696,25 @@
             $target = $target.closest('li');
         }
 
-        unevenOffset = (_.slideCount % _.options.slidesToScroll !== 0);
-        indexOffset = unevenOffset ? 0 : (_.slideCount - _.currentSlide) % _.options.slidesToScroll;
-
         switch (event.data.message) {
 
             case 'previous':
                 remainingSlides = _.currentSlide + _.options.slidesToShow;
-                if (_.options.partialSlideMode && (remainingSlides === _.slideCount || remainingSlides + 1 === _.slideCount)) {
+                if (_.options.partialSlideMode && !this.atPreviousStart && (remainingSlides + 1 === _.slideCount || remainingSlides === _.slideCount)) {
                     indexOffset = _.options.slidesToScroll - 1;
                     this.atPreviousStart = true;
                     this.atNextEnd = false;
                 } else if (_.options.partialSlideMode && (visibleSlidesWidth > sliderWidth)) {
-                    indexOffset = _.options.slidesToScroll - 1
+                    indexOffset = _.options.slidesToScroll - 1;
                     this.atPreviousStart = false;
+                    this.atNextEnd = false;
                 } else {
                     unevenOffset = (_.slideCount % _.options.slidesToScroll !== 0);
                     indexOffset = unevenOffset ? 0 : (_.slideCount - _.currentSlide) % _.options.slidesToScroll;
                     this.atPreviousStart = false;
+                    this.atNextEnd = false;
                 }
-                slideOffset = indexOffset === 0 ? _.options.slidesToScroll : _.options.slidesToShow - indexOffset;
+                slideOffset = indexOffset === 0 ? _.options.slidesToScroll : indexOffset;
                 if (_.slideCount > _.options.slidesToShow) {
                     _.slideHandler(_.currentSlide - slideOffset, false, dontAnimate);
                 }
@@ -725,16 +722,20 @@
 
             case 'next':
                 remainingSlides = _.slideCount - _.currentSlide - _.options.slidesToShow;
-                if (_.options.partialSlideMode && (remainingSlides < _.options.slidesToShow)) {
+                partialSlideRemaining = (remainingSlides < _.options.slidesToShow) && remainingSlides > 0;
+                if (_.options.partialSlideMode && partialSlideRemaining) {
                     indexOffset = _.options.slidesToScroll - 1
                     this.atNextEnd = true;
+                    this.atPreviousStart = false;
                 } else if (_.options.partialSlideMode && (visibleSlidesWidth > sliderWidth)) {
                     indexOffset = _.options.slidesToScroll - 1
                     this.atNexttEnd = false;
+                    this.atPreviousStart = false;
                 } else {
                     unevenOffset = (_.slideCount % _.options.slidesToScroll !== 0);
                     indexOffset = unevenOffset ? 0 : (_.slideCount - _.currentSlide) % _.options.slidesToScroll;
                     this.atNextEnd = false;
+                    this.atPreviousStart = false;
                 }
                 slideOffset = indexOffset === 0 ? _.options.slidesToScroll : indexOffset;
                 if (_.slideCount > _.options.slidesToShow) {
@@ -1102,9 +1103,10 @@
         _.slideOffset = 0;
         verticalHeight = _.$slides.first().outerHeight(true);
 
+        var slidesAlreadyDisplayed = _.slideCount - _.options.slidesToShow;
         var sliderWidth = _.$slider.width();
         var visibleSlidesWidth = _.slideWidth * _.options.slidesToShow;
-        var slidesAlreadyDisplayed = _.slideCount - _.options.slidesToShow;
+        var isMobile = sliderWidth === $(window).width();
 
         if (_.options.infinite === true) {
             if (_.slideCount > _.options.slidesToShow) {
@@ -1141,11 +1143,12 @@
             _.slideOffset += _.slideWidth * Math.floor(_.options.slidesToShow / 2);
         }
 
-        if (_.options.vertical === false && this.atNextEnd) {
+        if (_.options.vertical === false && this.atNextEnd && isMobile) {
             _.slideOffset = sliderWidth - visibleSlidesWidth;
             targetLeft = ((slidesAlreadyDisplayed * _.slideWidth) * -1) + _.slideOffset;
-        } else if (_.options.vertical === false && this.atPreviousStart) {
-            targetLeft = (((_.slideCount - _.options.slidesToShow - 1) * _.slideWidth) * -1) - _.slideOffset;
+        } else if (_.options.vertical === false && this.atPreviousStart && isMobile) {
+            _.slideOffset = sliderWidth - visibleSlidesWidth;
+            targetLeft = ((slideIndex * _.slideWidth) * -1) + _.slideOffset;
         } else if (_.options.vertical === false) {
             targetLeft = ((slideIndex * _.slideWidth) * -1) + _.slideOffset;
         } else {
