@@ -6,7 +6,7 @@
 |___/_|_|\___|_|\_(_)/ |___/
                    |__/
 
- Version: 1.5.16
+ Version: 1.5.17
   Author: Ken Wheeler
  Website: http://kenwheeler.github.io
     Docs: http://kenwheeler.github.io/slick
@@ -1977,8 +1977,11 @@
             _.$slideTrack.width(Math.ceil((_.slideWidth * _.$slideTrack.children('.slick-slide').length)));
         } else if (_.options.customWidth === true && _.$slideTrack.find('.js-carousel-slide-double').length) {
             var double = _.$slideTrack.find('.js-carousel-slide-double');
-            var doubleWidth = double.find(':first-child').outerWidth(true);
-            _.slideWidth = _.$slideTrack.children('.slick-slide:not(:first-child)').outerWidth(true);
+            // Add 5 to account for incorrect width calculation in IE.
+            var doubleWidth = double.find(':first-child').outerWidth(true) + 5;
+            // Add 3 to account for incorrect width calculation in IE.
+            _.slideWidth = _.$slideTrack.children('.slick-slide:not(:first-child)').outerWidth(true) + 3;
+            console.log('doubleWidth', doubleWidth, '_.slideWidth', _.slideWidth);
             _.$slideTrack.width(Math.ceil((_.slideWidth * (_.$slideTrack.children('.slick-slide').length - 1) + doubleWidth)));
             double.css({
               'width': doubleWidth
