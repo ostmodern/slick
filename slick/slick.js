@@ -1985,7 +1985,8 @@
               'width': doubleWidth
             });
         } else if (_.options.customWidth === true) {
-            _.slideWidth = _.$slideTrack.children('.slick-slide').outerWidth(true);
+              // Add 2 to account for incorrect width calculation in IE.
+             _.slideWidth = _.$slideTrack.children('.slick-slide').outerWidth(true) + 2;
             _.$slideTrack.width(Math.ceil((_.slideWidth * _.$slideTrack.children('.slick-slide').length)));
         } else if (_.options.variableWidth === true) {
             _.$slideTrack.width(5000 * _.slideCount);
@@ -2144,6 +2145,7 @@
     };
 
     Slick.prototype.setPosition = function() {
+      console.log('setting position');
 
         var _ = this;
 
