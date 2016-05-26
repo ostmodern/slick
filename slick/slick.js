@@ -1981,7 +1981,6 @@
             var doubleWidth = double.find(':first-child').outerWidth(true) + 5;
             // Add 3 to account for incorrect width calculation in IE.
             _.slideWidth = _.$slideTrack.children('.slick-slide:not(:first-child)').outerWidth(true) + 3;
-            console.log('doubleWidth', doubleWidth, '_.slideWidth', _.slideWidth);
             _.$slideTrack.width(Math.ceil((_.slideWidth * (_.$slideTrack.children('.slick-slide').length - 1) + doubleWidth)));
             double.css({
               'width': doubleWidth
