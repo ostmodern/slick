@@ -6,7 +6,7 @@
 |___/_|_|\___|_|\_(_)/ |___/
                    |__/
 
- Version: 1.5.15
+ Version: 1.5.16
   Author: Ken Wheeler
  Website: http://kenwheeler.github.io
     Docs: http://kenwheeler.github.io/slick
@@ -1103,6 +1103,7 @@
         _.slideOffset = 0;
         verticalHeight = _.$slides.first().outerHeight(true);
 
+        var controlsWidth =  _.$prevArrow.width() + _.$nextArrow.width();
         var slidesAlreadyDisplayed = _.slideCount - _.options.slidesToShow;
         var sliderWidth = _.$slider.width();
         var visibleSlidesWidth = _.slideWidth * _.options.slidesToShow;
@@ -1144,10 +1145,10 @@
         }
 
         if (_.options.vertical === false && this.atNextEnd && isMobile) {
-            _.slideOffset = sliderWidth - visibleSlidesWidth;
+            _.slideOffset = sliderWidth - visibleSlidesWidth - controlsWidth;
             targetLeft = ((slidesAlreadyDisplayed * _.slideWidth) * -1) + _.slideOffset;
         } else if (_.options.vertical === false && this.atPreviousStart && isMobile) {
-            _.slideOffset = sliderWidth - visibleSlidesWidth;
+            _.slideOffset = sliderWidth - visibleSlidesWidth - controlsWidth;
             targetLeft = ((slideIndex * _.slideWidth) * -1) + _.slideOffset;
         } else if (_.options.vertical === false) {
             targetLeft = ((slideIndex * _.slideWidth) * -1) + _.slideOffset;
