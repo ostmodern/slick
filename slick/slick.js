@@ -6,7 +6,7 @@
 |___/_|_|\___|_|\_(_)/ |___/
                    |__/
 
- Version: 1.5.15
+ Version: 1.5.16
   Author: Ken Wheeler
  Website: http://kenwheeler.github.io
     Docs: http://kenwheeler.github.io/slick
@@ -1103,6 +1103,7 @@
         _.slideOffset = 0;
         verticalHeight = _.$slides.first().outerHeight(true);
 
+        var controlsWidth =  _.$prevArrow.width() + _.$nextArrow.width();
         var slidesAlreadyDisplayed = _.slideCount - _.options.slidesToShow;
         var sliderWidth = _.$slider.width();
         var visibleSlidesWidth = _.slideWidth * _.options.slidesToShow;
@@ -1144,10 +1145,10 @@
         }
 
         if (_.options.vertical === false && this.atNextEnd && isMobile) {
-            _.slideOffset = sliderWidth - visibleSlidesWidth;
+            _.slideOffset = sliderWidth - visibleSlidesWidth - controlsWidth;
             targetLeft = ((slidesAlreadyDisplayed * _.slideWidth) * -1) + _.slideOffset;
         } else if (_.options.vertical === false && this.atPreviousStart && isMobile) {
-            _.slideOffset = sliderWidth - visibleSlidesWidth;
+            _.slideOffset = sliderWidth - visibleSlidesWidth - controlsWidth;
             targetLeft = ((slideIndex * _.slideWidth) * -1) + _.slideOffset;
         } else if (_.options.vertical === false) {
             targetLeft = ((slideIndex * _.slideWidth) * -1) + _.slideOffset;
@@ -1971,7 +1972,6 @@
         _.listWidth = _.$list.width();
         _.listHeight = _.$list.height();
 
-
         if (_.options.vertical === false && _.options.variableWidth === false && _.options.customWidth === false) {
             _.slideWidth = Math.ceil(_.listWidth / _.options.slidesToShow);
             _.$slideTrack.width(Math.ceil((_.slideWidth * _.$slideTrack.children('.slick-slide').length)));
@@ -1984,7 +1984,8 @@
               'width': doubleWidth
             });
         } else if (_.options.customWidth === true) {
-            _.slideWidth = _.$slideTrack.children('.slick-slide').outerWidth(true);
+              // Add 2 to account for incorrect width calculation in IE.
+             _.slideWidth = _.$slideTrack.children('.slick-slide').outerWidth(true) + 2;
             _.$slideTrack.width(Math.ceil((_.slideWidth * _.$slideTrack.children('.slick-slide').length)));
         } else if (_.options.variableWidth === true) {
             _.$slideTrack.width(5000 * _.slideCount);
@@ -2408,7 +2409,6 @@
     };
 
     Slick.prototype.slideHandler = function(index, sync, dontAnimate) {
-
         var targetSlide, animSlide, oldSlide, slideLeft, targetLeft = null,
             _ = this, navTarget;
 
