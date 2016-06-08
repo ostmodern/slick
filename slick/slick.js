@@ -605,7 +605,10 @@
             case 'previous':
             case 'right':
                 remainingSlides = _.currentSlide + _.options.slidesToShow;
-                if (_.options.partialSlideMode && !this.atPreviousStart && (remainingSlides + 1 === _.slideCount || remainingSlides === _.slideCount)) {
+                if (remainingSlides <= 0) {
+                    return;
+                }
+                if (_.options.partialSlideMode && !this.atPreviousStart && (remainingSlides - 1 === _.slideCount || remainingSlides === _.slideCount)) {
                     indexOffset = _.options.slidesToScroll - 1;
                     this.atPreviousStart = true;
                     this.atNextEnd = false;
@@ -626,6 +629,9 @@
             case 'left':
                 remainingSlides = _.slideCount - _.currentSlide - _.options.slidesToShow;
                 partialSlideRemaining = (remainingSlides < _.options.slidesToShow) && remainingSlides > 0;
+                if (remainingSlides <= 0) {
+                    return;
+                }
                 if (_.options.partialSlideMode && partialSlideRemaining) {
                     indexOffset = _.options.slidesToScroll - 1
                     this.atNextEnd = true;
