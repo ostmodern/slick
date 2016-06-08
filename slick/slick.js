@@ -6,7 +6,7 @@
 |___/_|_|\___|_|\_(_)/ |___/
                    |__/
 
- Version: 1.5.17
+ Version: 1.5.18
   Author: Ken Wheeler
  Website: http://kenwheeler.github.io
     Docs: http://kenwheeler.github.io/slick
@@ -590,6 +590,67 @@
 
     };
 
+    // Custom function - if a slide is partially visible, it calculates offset distance to scroll
+    Slick.prototype.calculateOffset = function(direction) {
+        var _ = this;
+        var sliderWidth = _.$slider.width();
+        var visibleSlidesWidth = _.slideWidth * _.options.slidesToShow;
+        var indexOffset;
+        var partialSlideRemaining;
+        var remainingSlides
+        var slideOffset
+        var unevenOffset;
+
+        switch (direction) {
+            case 'previous':
+            case 'right':
+                remainingSlides = _.currentSlide + _.options.slidesToShow;
+                if (remainingSlides <= 0) {
+                    return;
+                }
+                if (_.options.partialSlideMode && !this.atPreviousStart && (remainingSlides - 1 === _.slideCount || remainingSlides === _.slideCount)) {
+                    indexOffset = _.options.slidesToScroll - 1;
+                    this.atPreviousStart = true;
+                    this.atNextEnd = false;
+                } else if (_.options.partialSlideMode && (visibleSlidesWidth > sliderWidth)) {
+                    indexOffset = _.options.slidesToScroll - 1;
+                    this.atPreviousStart = false;
+                    this.atNextEnd = false;
+                } else {
+                    unevenOffset = (_.slideCount % _.options.slidesToScroll !== 0);
+                    indexOffset = unevenOffset ? 0 : (_.slideCount - _.currentSlide) % _.options.slidesToScroll;
+                    this.atPreviousStart = false;
+                    this.atNextEnd = false;
+                }
+                _.slideOffset = indexOffset === 0 ? - _.options.slidesToScroll : - indexOffset;
+                break;
+
+            case 'next':
+            case 'left':
+                remainingSlides = _.slideCount - _.currentSlide - _.options.slidesToShow;
+                partialSlideRemaining = (remainingSlides < _.options.slidesToShow) && remainingSlides > 0;
+                if (remainingSlides <= 0) {
+                    return;
+                }
+                if (_.options.partialSlideMode && partialSlideRemaining) {
+                    indexOffset = _.options.slidesToScroll - 1
+                    this.atNextEnd = true;
+                    this.atPreviousStart = false;
+                } else if (_.options.partialSlideMode && (visibleSlidesWidth > sliderWidth)) {
+                    indexOffset = _.options.slidesToScroll - 1
+                    this.atNexttEnd = false;
+                    this.atPreviousStart = false;
+                } else {
+                    unevenOffset = (_.slideCount % _.options.slidesToScroll !== 0);
+                    indexOffset = unevenOffset ? 0 : (_.slideCount - _.currentSlide) % _.options.slidesToScroll;
+                    this.atNextEnd = false;
+                    this.atPreviousStart = false;
+                }
+                _.slideOffset = indexOffset === 0 ? _.options.slidesToScroll : indexOffset;
+        }
+
+    };
+
     Slick.prototype.checkResponsive = function(initial, forceUpdate) {
 
         var _ = this,
@@ -679,7 +740,6 @@
     };
 
     Slick.prototype.changeSlide = function(event, dontAnimate) {
-
         var _ = this,
             $target = $(event.currentTarget),
             sliderWidth = _.$slider.width(),
@@ -696,63 +756,15 @@
             $target = $target.closest('li');
         }
 
-        switch (event.data.message) {
+        if (event.data.message !== 'index' && _.slideCount > _.options.slidesToShow) {
+            _.calculateOffset(event.data.message);
+            _.slideHandler(_.currentSlide + _.slideOffset, false, dontAnimate);
+        } else if (event.data.message === 'index') {
+            var index = event.data.index === 0 ? 0 :
+                event.data.index || $target.index() * _.options.slidesToScroll;
 
-            case 'previous':
-                remainingSlides = _.currentSlide + _.options.slidesToShow;
-                if (_.options.partialSlideMode && !this.atPreviousStart && (remainingSlides + 1 === _.slideCount || remainingSlides === _.slideCount)) {
-                    indexOffset = _.options.slidesToScroll - 1;
-                    this.atPreviousStart = true;
-                    this.atNextEnd = false;
-                } else if (_.options.partialSlideMode && (visibleSlidesWidth > sliderWidth)) {
-                    indexOffset = _.options.slidesToScroll - 1;
-                    this.atPreviousStart = false;
-                    this.atNextEnd = false;
-                } else {
-                    unevenOffset = (_.slideCount % _.options.slidesToScroll !== 0);
-                    indexOffset = unevenOffset ? 0 : (_.slideCount - _.currentSlide) % _.options.slidesToScroll;
-                    this.atPreviousStart = false;
-                    this.atNextEnd = false;
-                }
-                slideOffset = indexOffset === 0 ? _.options.slidesToScroll : indexOffset;
-                if (_.slideCount > _.options.slidesToShow) {
-                    _.slideHandler(_.currentSlide - slideOffset, false, dontAnimate);
-                }
-                break;
-
-            case 'next':
-                remainingSlides = _.slideCount - _.currentSlide - _.options.slidesToShow;
-                partialSlideRemaining = (remainingSlides < _.options.slidesToShow) && remainingSlides > 0;
-                if (_.options.partialSlideMode && partialSlideRemaining) {
-                    indexOffset = _.options.slidesToScroll - 1
-                    this.atNextEnd = true;
-                    this.atPreviousStart = false;
-                } else if (_.options.partialSlideMode && (visibleSlidesWidth > sliderWidth)) {
-                    indexOffset = _.options.slidesToScroll - 1
-                    this.atNexttEnd = false;
-                    this.atPreviousStart = false;
-                } else {
-                    unevenOffset = (_.slideCount % _.options.slidesToScroll !== 0);
-                    indexOffset = unevenOffset ? 0 : (_.slideCount - _.currentSlide) % _.options.slidesToScroll;
-                    this.atNextEnd = false;
-                    this.atPreviousStart = false;
-                }
-                slideOffset = indexOffset === 0 ? _.options.slidesToScroll : indexOffset;
-                if (_.slideCount > _.options.slidesToShow) {
-                    _.slideHandler(_.currentSlide + slideOffset, false, dontAnimate);
-                }
-                break;
-
-            case 'index':
-                var index = event.data.index === 0 ? 0 :
-                    event.data.index || $target.index() * _.options.slidesToScroll;
-
-                _.slideHandler(_.checkNavigable(index), false, dontAnimate);
-                $target.children().trigger('focus');
-                break;
-
-            default:
-                return;
+            _.slideHandler(_.checkNavigable(index), false, dontAnimate);
+            $target.children().trigger('focus');
         }
 
     };
@@ -1143,6 +1155,8 @@
             _.slideOffset = 0;
             _.slideOffset += _.slideWidth * Math.floor(_.options.slidesToShow / 2);
         }
+
+
 
         if (_.options.vertical === false && this.atNextEnd && isMobile) {
             _.slideOffset = sliderWidth - visibleSlidesWidth - controlsWidth;
@@ -2713,6 +2727,8 @@
             return false;
         }
 
+        swipeDirection = _.swipeDirection();
+        _.calculateOffset(swipeDirection);
         curLeft = _.getLeft(_.currentSlide);
 
         _.touchObject.curX = touches !== undefined ? touches[0].pageX : event.clientX;
@@ -2725,8 +2741,6 @@
             _.touchObject.swipeLength = Math.round(Math.sqrt(
                 Math.pow(_.touchObject.curY - _.touchObject.startY, 2)));
         }
-
-        swipeDirection = _.swipeDirection();
 
         if (swipeDirection === 'vertical') {
             return;
