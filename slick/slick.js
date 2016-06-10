@@ -6,7 +6,7 @@
 |___/_|_|\___|_|\_(_)/ |___/
                    |__/
 
- Version: 1.5.19
+ Version: 1.5.21
   Author: Ken Wheeler
  Website: http://kenwheeler.github.io
     Docs: http://kenwheeler.github.io/slick
@@ -608,7 +608,7 @@
                 if (remainingSlides <= 0) {
                     return;
                 }
-                if (_.options.partialSlideMode && !this.atPreviousStart && (remainingSlides - 1 === _.slideCount || remainingSlides === _.slideCount)) {
+                if (_.options.partialSlideMode && !this.atPreviousStart && (_.slideCount % _.options.slidesToShow !== 0) && (remainingSlides - 1 === _.slideCount || remainingSlides === _.slideCount)) {
                     indexOffset = _.options.slidesToScroll - 1;
                     this.atPreviousStart = true;
                     this.atNextEnd = false;
