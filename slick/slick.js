@@ -6,7 +6,7 @@
 |___/_|_|\___|_|\_(_)/ |___/
                    |__/
 
- Version: 1.5.19
+ Version: 1.5.20
   Author: Ken Wheeler
  Website: http://kenwheeler.github.io
     Docs: http://kenwheeler.github.io/slick
@@ -593,6 +593,7 @@
     // Custom function - if a slide is partially visible, it calculates offset distance to scroll
     Slick.prototype.calculateOffset = function(direction) {
         var _ = this;
+        var controlsWidth =  _.$prevArrow.width() + _.$nextArrow.width();
         var sliderWidth = _.$slider.width();
         var visibleSlidesWidth = _.slideWidth * _.options.slidesToShow;
         var indexOffset;
@@ -612,7 +613,7 @@
                     indexOffset = _.options.slidesToScroll - 1;
                     this.atPreviousStart = true;
                     this.atNextEnd = false;
-                } else if (_.options.partialSlideMode && (visibleSlidesWidth > sliderWidth)) {
+                } else if (_.options.partialSlideMode && (visibleSlidesWidth > sliderWidth - controlsWidth)) {
                     indexOffset = _.options.slidesToScroll - 1;
                     this.atPreviousStart = false;
                     this.atNextEnd = false;
@@ -744,7 +745,7 @@
             $target = $(event.currentTarget),
             sliderWidth = _.$slider.width(),
             visibleSlidesWidth = _.slideWidth * _.options.slidesToShow,
-            indexOffset, partialSlideRemaining, remainingSlides, slideOffset, unevenOffset;
+            indexOffset, partialSlideRemaining, remainingSlides, slideOffset, slideIndex, unevenOffset;
 
         // If target is a link, prevent default action.
         if($target.is('a')) {
@@ -758,11 +759,12 @@
 
         if (event.data.message !== 'index' && _.slideCount > _.options.slidesToShow) {
             _.calculateOffset(event.data.message);
-            _.slideHandler(_.currentSlide + _.slideOffset, false, dontAnimate);
+            // Ensure slideIndex is never less than 0
+            slideIndex = _.currentSlide + _.slideOffset > 0 ? _.currentSlide + _.slideOffset : 0;
+            _.slideHandler(slideIndex, false, dontAnimate);
         } else if (event.data.message === 'index') {
             var index = event.data.index === 0 ? 0 :
                 event.data.index || $target.index() * _.options.slidesToScroll;
-
             _.slideHandler(_.checkNavigable(index), false, dontAnimate);
             $target.children().trigger('focus');
         }
